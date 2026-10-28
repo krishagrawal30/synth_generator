@@ -1,0 +1,9 @@
+# CPU-only PyTorch keeps the install small (~200 MB instead of ~2.5 GB with CUDA).
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+streamlit>=1.40
+pandas
+numpy
+scikit-learn
+plotly
+ucimlrepo
