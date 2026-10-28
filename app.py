@@ -30,7 +30,7 @@ LOCAL_CSV = Path(os.environ.get("SYNTH_LOCAL_CSV", "diabetic_data.csv"))
 REQUIRED = ["encoder.json", "meta.json", "reference.json", "ae.pt", "vae.pt", "gan.pt"]
 COLORS = {"AE+GMM": "#1f77b4", "VAE": "#2ca02c", "WGAN-GP": "#d62728", "Marginals": "#9e9e9e", "Real": "#2b2b2b"}
 FILTER_COLS = ["age", "gender", "race", "diag_1", "early_readmit", "insulin", "A1Cresult", "diabetesMed"]
-PAGES = ["🏠 Overview", "🧬 Generate data", "📊 Compare models", "🧪 Train & test live", "📘 About & defence"]
+PAGES = ["🏠 Overview", "🧬 Generate data", "📊 Compare models", "🧪 Train & test live"]
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -171,7 +171,7 @@ def page_overview():
             "- **📊 Compare models** – interactive scorecard, utility (train-on-synthetic, test-on-real), privacy audit, "
             "relationship preservation and the β-VAE privacy–utility frontier.\n"
             "- **🧪 Train & test live** – retrain small versions of all three models on a dataset you provide and audit them on the spot.\n"
-            "- **📘 About & defence** – dataset facts, design decisions, limitations and likely viva questions.")
+        )
     with right:
         st.subheader("Pipeline")
         st.graphviz_chart('''
@@ -547,51 +547,5 @@ def show_live(L):
     st.download_button("⬇️ CSV", L["synth"][pick].to_csv(index=False).encode(), file_name=f"live_synthetic_{pick.replace('+', '_')}.csv", mime="text/csv")
 
 
-# ════════════════════════════════════════════════════════════════════
-# 📘 About & defence
-# ════════════════════════════════════════════════════════════════════
-def page_about():
-    st.header("📘 About the project and how to defend it")
-    st.subheader("Dataset")
-    st.table(pd.DataFrame({
-        "Item": ["Name", "Source", "Origin", "Size", "Inclusion rule", "Label", "Paper"],
-        "Detail": ["Diabetes 130-US Hospitals for Years 1999–2008",
-                   "UCI Machine Learning Repository, dataset ID 296 (archive.ics.uci.edu/dataset/296)",
-                   "Health Facts database – 130 US hospitals / integrated delivery networks, 10 years",
-                   "101,766 encounters × 50 attributes",
-                   "Inpatient, diabetes diagnosed, stay 1–14 days, labs performed, medications given",
-                   "readmitted ∈ {NO, >30, <30} → early readmission = “<30”",
-                   "Strack et al., BioMed Research International, 2014"]}).set_index("Item"))
-
-    st.subheader("Design decisions worth defending")
-    st.markdown(
-        "- **First encounter per patient** – repeated visits of one person would leak between train and test and invalidate privacy audits.\n"
-        "- **Expired / hospice discharges removed** – these patients cannot be readmitted and would corrupt the label.\n"
-        "- **ICD-9 codes grouped into 9 categories**, near-constant drugs dropped, rare categories (<0.5 %) merged – fewer, safer dimensions.\n"
-        "- **Aggregate-only reference statistics in this app** – the deployed app contains no real patient rows.\n"
-        "- **Independent-marginals baseline** – matches every histogram but breaks every relationship; any metric that did not punish it would be useless.")
-
-    st.subheader("Likely viva questions")
-    faq = {
-        "Why these three models?": "They are the syllabus generative families – deterministic autoencoder, probabilistic latent-variable model (VAE) and adversarial model (GAN) – and they trade off stability, speed and sharpness differently.",
-        "A plain autoencoder can’t generate data. How did you use it?": "We fit a Gaussian mixture on the latent codes of the training data and decode samples from the mixture, giving the AE a sampling distribution.",
-        "What is posterior collapse and how did you avoid it?": "The VAE ignores its latent code and the KL term goes to zero. KL annealing (β ramps up from 0) and monitoring the KL curve address it.",
-        "Why WGAN-GP instead of a vanilla GAN?": "The Wasserstein loss with a gradient penalty gives smoother gradients and a loss that tracks quality, which reduces instability and mode collapse.",
-        "How is utility measured?": "Train on synthetic, test on real (TSTR) for early-readmission prediction, normalised to *skill retention* because an AUC of 0.5 is already “free”.",
-        "How do you know the privacy audit works?": "Two controls go through the same audit: a generator that copies the training set is flagged (MIA-AUC ≈ 1), while fresh real patients look clean (≈ 0.5).",
-        "Is the synthetic data private?": "Not formally. We provide empirical audits (DCR, exact matches, quasi-identifier hits, membership inference), not a differential-privacy guarantee. DP-SGD is listed as future work.",
-        "The AUC is low – is the project weak?": "30-day readmission is a notoriously hard task. The contribution is the relative comparison (how much real skill each synthetic table keeps) and the audit, not a state-of-the-art predictor.",
-    }
-    for q, a in faq.items():
-        with st.expander(q):
-            st.write(a)
-
-    st.subheader("Limitations")
-    st.markdown("Empirical privacy only · public, already de-identified proxy data · dated US-specific cohort (1999–2008) · modest absolute AUC · "
-                "single dataset and seed · **not a clinical tool**.")
-    st.caption("References: Kingma & Welling 2014 (VAE) · Goodfellow et al. 2014 (GAN) · Gulrajani et al. 2017 (WGAN-GP) · Higgins et al. 2017 (β-VAE) · "
-               "Bowman et al. 2016 (KL annealing) · Xu et al. 2019 (CTGAN) · Shokri et al. 2017 (membership inference) · Strack et al. 2014 (dataset).")
-
-
 {"🏠 Overview": page_overview, "🧬 Generate data": page_generate, "📊 Compare models": page_compare,
- "🧪 Train & test live": page_train, "📘 About & defence": page_about}[page]()
+ "🧪 Train & test live": page_train}[page]()
