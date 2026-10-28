@@ -1,0 +1,62 @@
+{
+ "dataset": "UCI Diabetes 130-US Hospitals (1999-2008), dataset id 296",
+ "n_train": 32000,
+ "n_test": 8000,
+ "encoded_width": 155,
+ "positive_rate": 0.0914375,
+ "latent_dim": 16,
+ "gan_z_dim": 64,
+ "cfg": {
+  "seed": 42,
+  "max_rows": 40000,
+  "test_size": 0.2,
+  "min_cat_freq": 0.005,
+  "latent_dim": 16,
+  "batch_size": 512,
+  "lr": 0.001,
+  "ae_epochs": 40,
+  "gmm_components": 8,
+  "vae_epochs": 40,
+  "vae_beta": 1.0,
+  "kl_anneal_frac": 0.3,
+  "gan_steps": 3000,
+  "gan_z_dim": 64,
+  "gan_n_critic": 5,
+  "gan_lr": 0.0002,
+  "gan_gp": 10.0,
+  "beta_grid": [
+   0.1,
+   0.5,
+   1.0,
+   2.0,
+   4.0
+  ],
+  "sweep_epochs": 25,
+  "privacy_n": 5000,
+  "assoc_n": 15000
+ },
+ "fast_dev": false,
+ "train_time": {
+  "AE+GMM": 53.36839318275452,
+  "VAE": 27.787492752075195,
+  "WGAN-GP": 131.8224856853485
+ },
+ "pillar_weights": {
+  "fidelity": 0.3333333333333333,
+  "utility": 0.3333333333333333,
+  "privacy": 0.3333333333333333
+ },
+ "models": [
+  "AE+GMM",
+  "VAE",
+  "WGAN-GP"
+ ],
+ "sources": [
+  "Marginals",
+  "AE+GMM",
+  "VAE",
+  "WGAN-GP"
+ ],
+ "torch": "2.11.0+cu130",
+ "exported": "2026-10-28 06:01:48"
+}
